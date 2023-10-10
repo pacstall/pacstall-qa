@@ -1,0 +1,36 @@
+#!/usr/bin/env nu
+
+def parse-pr [pr: string] -> list {
+    return ($pr | parse "{provider}:{user}/{repo}/{pr}")
+}
+
+def parse-link [provider: list, pkg: string] -> [list<string, list>] {
+    match $provider.provider.0 {
+        "github" => {
+            let gh_provides = (http get $"https://api.github.com/repos/pacstall/pacstall-programs/pulls/($provider.pr.0)")
+            return [$"https://raw.githubusercontent.com/($gh_provides.head.repo.full_name)/($gh_provides.head.ref)/packages/($pkg)/($pkg).pacscript" $gh_provides]
+            },
+        _ => {
+                print -e $"($provider.provider.0) is not a valid provider!"
+                exit 1
+             },
+    }
+}
+
+# A tool to target and install packages based off of PRs
+def main [
+         --metalink (-m): string # Parse a URL to target for pacstall
+         --install (-I): string # Package to install
+         ] -> int {
+
+    if ($metalink | is-empty) or ($install | is-empty) {
+        print -e "'--metalink' and '--install' cannot be empty!"
+        exit 1
+    }
+    let parsed_pr = (parse-pr $metalink)
+    let provider_url = (parse-link $parsed_pr $install)
+    ^wget -q $provider_url.0 -O $"($install).pacscript"
+    print $"Installing (ansi green)($install)(ansi reset)\((ansi purple)($provider_url.1.user.login)(ansi reset):(ansi red)($parsed_pr.pr.0)(ansi reset)\)"
+    ^pacstall -I $"($install).pacscript"
+    rm -f $"($install).pacscript"
+}
