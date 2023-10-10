@@ -11,7 +11,7 @@ pacstall-qa -m <metalink> -I <package>
 ###### metalink
 The metalink takes the following form:
 
-```toml
+```
 provider:user/repo/pr
 ```
 
