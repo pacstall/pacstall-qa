@@ -11,8 +11,9 @@ def parse-link [provider: list, pkg: string] -> [list<string, list>] {
             return [$"https://raw.githubusercontent.com/($gh_provides.head.repo.full_name)/($gh_provides.head.ref)/packages/($pkg)/($pkg).pacscript" $gh_provides]
             },
         _ => {
-                print -e $"($provider.provider.0) is not a valid provider!"
-                exit 1
+                error make -u {
+                    msg: $"(ansi red)'($provider.provider.0)' is not a valid provider!(ansi reset)"
+                }
              },
     }
 }
