@@ -8,4 +8,4 @@ cleanup() {
 }
 trap cleanup EXIT
 trap cleanup INT
-/usr/share/pacstall-qa/pacstall-qa $@
+/usr/share/pacstall-qa/pacstall-qa "$@"
