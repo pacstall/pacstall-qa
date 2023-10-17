@@ -1,0 +1,11 @@
+#!/bin/bash
+cleanup() {
+  if [[ -f /usr/share/pacstall/repo/pacstallrepo.pacstall-qa.bak ]]; then
+    echo "Returning '/usr/share/pacstall/repo/pacstallrepo' backup"
+    sudo rm -f /usr/share/pacstall/repo/pacstallrepo
+    sudo mv /usr/share/pacstall/repo/pacstallrepo.pacstall-qa.bak /usr/share/pacstall/repo/pacstallrepo
+  fi
+}
+trap cleanup EXIT
+trap cleanup INT
+/usr/share/pacstall-qa/pacstall-qa $@
