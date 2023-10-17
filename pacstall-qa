@@ -32,7 +32,7 @@ def main [
     let provider_url = (parse-link $parsed_pr $install)
     print $"Backing up '/usr/share/pacstall/repo/pacstallrepo'"
     ^sudo mv /usr/share/pacstall/repo/pacstallrepo /usr/share/pacstall/repo/pacstallrepo.pacstall-qa.bak
-    ^echo $"($provider_url.0)" | ^sudo tee /usr/share/pacstall/repo/pacstallrepo out> /dev/null
+    echo $"($provider_url.0)\n" | ^sudo tee /usr/share/pacstall/repo/pacstallrepo out> /dev/null
     print $"Installing (ansi green)($install)(ansi reset)\((ansi purple)($provider_url.1.head.user.login)(ansi reset):(ansi red)($parsed_pr.pr.0)(ansi reset)\)"
     ^pacstall -I $"($install)"
     print $"Returning '/usr/share/pacstall/repo/pacstallrepo' backup"
