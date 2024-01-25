@@ -1,13 +1,13 @@
 #!/usr/bin/env nu
 
-def parse-pr [pr: string] -> list {
-    return ($pr | parse "{provider}:{user}/{repo}/{pr}")
+def parse-pr [pr: string, request: string] -> list {
+    return ($"($pr)/($request)" | parse "{provider}:{user}/{repo}/{pr}")
 }
 
 def parse-link [provider: list, pkg: string] -> [list<string, list>] {
     match $provider.provider.0 {
         "github" => {
-            let gh_provides = (http get $"https://api.github.com/repos/pacstall/pacstall-programs/pulls/($provider.pr.0)")
+            let gh_provides = (http get $"https://api.github.com/repos/($provider.user.0)/($provider.repo.0)/pulls/($provider.pr.0)")
             return [$"https://raw.githubusercontent.com/($gh_provides.head.repo.full_name)/($gh_provides.head.sha)" $gh_provides]
             },
         _ => {
@@ -20,15 +20,16 @@ def parse-link [provider: list, pkg: string] -> [list<string, list>] {
 
 # A tool to target and install packages based off of PRs
 def main [
-         --metalink (-m): string # Parse a URL to target for pacstall
+         --metalink (-m): string = "github:pacstall/pacstall-programs" # Parse a URL to target for pacstall, default to pacstall-programs
+         --number (-n): string # PR number
          --install (-I): string # Package to install
          ] -> int {
 
-    if ($metalink | is-empty) or ($install | is-empty) {
-        print -e "'--metalink' and '--install' cannot be empty!"
+    if ($number | is-empty) or ($install | is-empty) {
+        print -e "'--number' and '--install' cannot be empty!"
         exit 1
     }
-    let parsed_pr = (parse-pr $metalink)
+    let parsed_pr = (parse-pr $metalink $number)
     let provider_url = (parse-link $parsed_pr $install)
     print $"Backing up '/usr/share/pacstall/repo/pacstallrepo'"
     ^sudo mv /usr/share/pacstall/repo/pacstallrepo /usr/share/pacstall/repo/pacstallrepo.pacstall-qa.bak
